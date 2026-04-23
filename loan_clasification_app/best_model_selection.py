@@ -2,6 +2,7 @@ try:
     import pandas as pd
     import numpy as np
 
+    from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
     from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 
@@ -11,14 +12,15 @@ try:
     from sklearn.linear_model import LogisticRegression
     from sklearn.ensemble import RandomForestClassifier
 
+    from encoding import encode_columns
     import train_test_Split
 
 
-    class best_model:
+    class select_model:
 
-        def __init__(self, file_path):
-            self.file_path = file_path
+        def __init__(self):
             self.scaler = StandardScaler()
+
             self.models = {
                 "Decision Tree": DecisionTreeClassifier(random_state=42),
                 "Naive Bayes": GaussianNB(),
@@ -26,26 +28,23 @@ try:
                 "Logistic Regression": LogisticRegression(max_iter=1000, class_weight='balanced'),
                 "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
             }
+
             self.results = {}
+            self.best_model_name = None
 
-        def load_data(self):
-            df = pd.read_csv(self.file_path)
+        def load_and_prepare_data(self):
+            df = encode_columns()
             df = df.drop(columns=["Loan_ID"], errors="ignore")
-            return df
 
-        def split_data(self):
             x_train, x_test, y_train, y_test = train_test_Split.split_df()
-            return x_train, x_test, y_train, y_test
 
-        def scale_data(self, x_train, x_test):
             x_train_scaled = self.scaler.fit_transform(x_train)
             x_test_scaled = self.scaler.transform(x_test)
-            return x_train_scaled, x_test_scaled
 
-        def train_and_evaluate(self):
+            return x_train, x_test, y_train, y_test, x_train_scaled, x_test_scaled
 
-            x_train, x_test, y_train, y_test = self.split_data()
-            x_train_scaled, x_test_scaled = self.scale_data(x_train, x_test)
+        def train_models(self):
+            x_train, x_test, y_train, y_test, x_train_scaled, x_test_scaled = self.load_and_prepare_data()
 
             for name, model in self.models.items():
 
@@ -68,8 +67,9 @@ try:
                 print("ROC-AUC:", roc)
                 print(classification_report(y_test, y_pred))
 
-            best_model_name = max(self.results, key=lambda x: self.results[x][1])
-            return best_model_name
+            self.best_model_name = max(self.results, key=lambda x: self.results[x][1])
+
+            return self.best_model_name, self.results
 
 except Exception as e:
     print("Error:", str(e))
