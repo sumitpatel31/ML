@@ -5,18 +5,16 @@ import traceback
 from train_test_Split import split_df
 from model_devlopment import dt, nb, knn, lr, rf
 from sklearn.metrics import accuracy_score
+from best_model_selection import select_model
 
-app = FastAPI(title="Loan Prediction ML API")
+app = FastAPI(title="Loan clasification ML API")
 
-# -----------------------------
-# Global objects (loaded once)
-# -----------------------------
+trainer = select_model()
+
 X_train, X_test, y_train, y_test = None, None, None, None
 models = {}
 
-# -----------------------------
-# Startup event
-# -----------------------------
+
 @app.on_event("startup")
 def load_data_and_models():
     global X_train, X_test, y_train, y_test, models
@@ -41,12 +39,25 @@ def load_data_and_models():
         traceback.print_exc()
 
 
-# -----------------------------
+
 # Routes
-# -----------------------------
+
 @app.get("/")
 def home():
     return {"message": "Loan Prediction API is running 🚀"}
+
+@app.get("/best")
+def train_model():
+    best_model, results = trainer.train_models()
+
+    return {
+        "best_model": best_model,
+        "results": {
+            name: {"accuracy": acc, "roc_auc": roc}
+            for name, (acc, roc) in results.items()
+        }
+    }
+    
 
 
 @app.get("/models")
