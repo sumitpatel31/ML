@@ -36,6 +36,7 @@ This project includes:
 - Random Forest  
 
 ✅ Returns:
+- Best Model Name
 - Accuracy
 - Precision
 - Recall
@@ -51,9 +52,3 @@ This project includes:
 
     2. Start the FastAPI server
     uvicorn app:app --reload
-
-### 1️⃣ Clone the repository
-
-```bash
-git clone https://github.com/sumitpatel31/loan-fastapi-ml.git
-cd loan-fastapi-ml 
